@@ -1,0 +1,617 @@
+==================
+Your New MOM6 Node
+==================
+
+:author: Marshall Ward
+:organization: NOAA-GFDL
+:description: Maintenance of MOM6 within GFDL and across the consortium
+:date: 2024-11-13
+:url: https://marshallward.org/access2024/index.html
+:preface:
+   TODO
+
+
+
+MOM6 Consortium
+===============
+
+.. image:: img/consortium.svg
+   :width: 80%
+
+
+.. this is you
+
+
+What is the MOM6 Consortium?
+----------------------------
+
+.. list-table::
+   :widths: 50 50
+
+   - * .. image:: img/consortium.svg
+
+     * Codebase is governed by a consortium of research groups.
+
+       All changes to the "hub" must be tracked and preserved.
+
+       Groups manage their own branch, and contribute to ``main``.
+
+
+Consortium Taxonomy
+-------------------
+
+* ``main``
+
+  "Public release", hosted at mom-ocean/MOM6
+
+* ``dev/{gfdl,ncar,access,...}``
+
+  Development nodes.  Commits in ``dev/*`` will be in ``main``
+
+* User forks
+
+  Actual model development, commits are *rebased* into ``dev/*`` (...?)
+
+
+Contribution Rules
+==================
+
+Every node can change code as needed, and defines its own process.  However,
+changes must not disrupt ongoing research.
+
+* Code must not change existing solutions
+
+* History must be preserved
+
+This is maintained by *careful testing* and *consensus*!
+
+.. notes::
+
+   How to navigate this issue?
+
+   * Regression testing requires reproducibility
+
+   * Forecasters require reproducible output
+
+   * Researchers want latest features without answer changes
+
+
+GFDL PR life Cycle
+==================
+
+.. image:: img/life_cycle.svg
+
+1. User submits to node by PR
+
+2. Automated verification testing
+
+3. Code review (by a human)
+
+4. Test for regressions on production machine
+
+5. Rebase into node codebase
+
+
+Verification Testing
+====================
+
+This should run on any system, any compiler::
+
+   $ git clone https://github.com/mom-ocean/MOM6.git --recursive
+   $ cd MOM6/.testing
+   $ make -j test
+
+* Code is documented, looks "pretty"
+
+* Unit tests are passing
+
+* Solutions are "invariant" (huh?) to various tests and transforms (layout,
+  restarts, *dimensional*, *rotations*)
+
+
+Memory Grids
+------------
+
+.. list-table::
+
+   * - Symmetric:
+
+       .. figure:: img/Horizontal_NE_indexing_sym.png
+
+
+     - Nonsymmetric:
+
+       .. figure:: img/Horizontal_NE_indexing_nonsym.png
+
+
+Layout
+------
+
+1x1 vs 2x1 vs 1x2(?)
+
+
+Restart
+-------
+
+DT = 2x (DT/2)
+
+
+Dimensional
+-----------
+
+.. math::
+
+      u_t + u u_x + v u_y &= -g h_x \\
+      v_t + u v_x + v v_y &= -g h_y \\
+      h_t + h u_x + h v_y &= 0 \\
+
+.. list-table::
+
+   * - Dimensions:
+       * :math:`L` (horiz. length)
+       * :math:`T` (time)
+       * :math:`H` (layer depth)
+
+     - Invariants:
+       * :math:`\left[ u, v \right] = L T^{-1}`
+       * :math:`\left[ g \right] = L^2 H^{-1} T^{-2}`
+
+
+
+Rotation
+--------
+
+Equations should be invariant to rotation
+
+.. list-table::
+   :widths: 25 25 25 25
+
+   * - .. image:: media/orig.png
+
+     - .. image:: img/rotate_grid1.svg
+
+     - .. image:: media/rotate.png
+
+     - .. image:: img/rotate_grid2.svg
+
+Perhaps should be called an "index" rotation
+
+.. image:: img/rotate_mem.svg
+          :width: 65%
+
+.. notes::
+
+   * Caveat that we have to rotate *everything* (grids, fields, etc)
+
+   * Again, bit reproducibility makes this possible
+
+
+Invariant stencils
+------------------
+
+:math:`\phi^{(c)}_{i,j} = \frac{1}{4} (\phi_A + \phi_B + \phi_C + \phi_D)`
+
+.. list-table::
+
+   * - .. image:: img/stencil1.svg
+
+     - :math:`\frac{1}{4} (
+            ({\color{LightCoral}{\phi_A}} + {\color{LightCoral}{\phi_B}})
+            + ({\color{LightSkyBlue}{\phi_C}} + {\color{LightSkyBlue}{\phi_D}})
+       )`
+
+       :math:`\frac{1}{4} (
+            ({\color{LightCoral}{\phi_A}} + {\color{LightSkyBlue}{\phi_C}})
+            + ({\color{LightCoral}{\phi_B}} + {\color{LightSkyBlue}{\phi_D}})
+       )`
+
+   * - .. image:: img/stencil2.svg
+
+     - :math:`\frac{1}{4} (
+            ({\color{LightCoral}{\phi_A + \phi_D}})
+            + ({\color{LightSkyBlue}{\phi_B + \phi_C}})
+       )`
+
+.. notes::
+
+   Example: Interpolation from vertex to center point
+
+   The ideal outcome is to construct the stencil in a rotationally invariant
+   form.
+
+   The first example will evaluate its terms in a different order after a
+   quarter turn.
+
+   The second form is rotationally invariant to any number of quarter turns.
+
+
+
+
+Misc
+----
+
+* Static memory
+
+* OpenMP
+
+* Randomized Initialization
+
+
+Verification Testing
+====================
+
+.. image:: img/mom_verify.svg
+   :width: 75%
+
+CI testing is *platform independent*
+
+.. notes::
+
+   * Sketch of how our CI verifies code contributions
+
+   * Use "verification" in the Barry Boehm "Verification and Validation"
+     sense...
+
+   * Executable is compiled in various modes
+
+      * compile-time grid, code coverage, etc
+
+   * Run "micro-tests" based on larger configs
+
+   * Each test subject to a variety of **invariance** tests
+
+
+State of the Model
+==================
+
+Global energy tracked to full precision
+
+.. code:: mathematica
+
+  Step   Days   Energy/Mass [m2 s-2]     Mean Sea Level [m]   ...
+
+     0   0.00   7.2161166068132286E-27   1.8190E-12           ...
+    12   0.50   2.7781004671136538E-04   1.1369E-12           ...
+    24   1.00   2.7734897826598717E-04   1.8190E-12           ...
+
+Diagnostics use multiple metrics
+
+.. code:: mathematica
+
+     u-point: ocean_model-u
+       min  = -6.7187595818683776E-03  max  =  3.3480219779204019E-02
+       mean =  1.1239682303793666E-04  bits = 21851
+     v-point: ocean_model-v
+       min  = -8.3469699425156359E-03  max  =  6.8420831486068704E-03
+       mean =  1.2076392816784489E-03  bits = 18606
+     h-point: ocean_model-h
+       min  =  9.9999999999999915E-04  max  =  5.6265092225099863E+02
+       mean =  3.6490088139048595E+02  bits = 18673
+     ...
+
+.. notes::
+
+   * bit-reproducible summation allow for global metrics
+
+   * The CI checks *every diagnostic*
+
+   * Using min/max/mean + bitcount catches just about any error you can imagine
+
+      * min/max help catch values below ULP
+
+         * more min than max!
+
+      * bitcount further catches diffs
+
+      * It is not perfect!  Reordering does not produce a regression.  Use
+        Murmur or MD5?
+
+
+Regression Suite
+================
+
+.. image:: img/mom6_reg_suite.svg
+
+Validate 61 tests using 3 compilers
+
+.. notes::
+
+   * Three compilers (GNU, Intel, Nvidia)
+
+   * Test from idealized (2d, column, ...) to production (OM4)
+
+   * Requires our production machine!
+
+      * (up to 480 cores)
+
+
+Bit Reproducibility
+===================
+
+Sources of regressions:
+
+* Arithmetic
+
+  :math:`(x + y) + z \neq x + (y + z)`
+
+* Fortran Intrinsics
+
+  ``sum()``, ``sin()``, ``matmul()``, ``a**b``
+
+* Math libraries
+
+  Your OS (``libc.a``) may define ``sin()``
+
+* Fused multiply-add (FMA): ``a*b+c``
+
+
+Floating Point Review
+---------------------
+
+.. image:: img/ieee_float_fmt.svg
+   :target: https://commons.wikimedia.org/wiki/File:Float_example.svg
+
+.. math::
+
+   \phi = (-1)^{\color{yellow} s} \times 2^{\color{aquamarine} M}
+      \times (1 + {\color{pink} \alpha})
+
+* Smallest fractional diff:
+  :math:`\color{yellow}{2^{-52} \approx 2.2 \times 10^{-16}}`
+
+* 17 digits to uniquely specify a result
+
+
+Float Order-of-Operations
+-------------------------
+
+What is :math:`10^{-16} + 1 - 1`?  Ambiguous!
+
+.. math::
+
+   (10^{-16} + 1) - 1 &\equiv 0 \\
+   10^{-16} + (1 - 1) &= 10^{-16}
+
+Residuals below ULP :math:`\left(2 \times 10^{-16}\right)` are lost.
+
+*Use parentheses to set the order of operations*
+
+.. notes::
+
+   * Without parentheses, compilers can reorder
+
+      * Perhaps for a good reason!  But come back to that... (or not?)
+
+   * Scientifically, we may need a particular order!
+
+   * Must use language that respects parentheses
+
+   ULP: Unit of least precision (or lowest bit)
+
+   10^-16 is below the current ULP (2x10^-16), so is lost in the first example.
+
+   Cancellation in the second summation shifts ULP, preserving 10^-16.
+
+
+Transcendentals
+---------------
+
+How is ``sin(x)`` computed?  Ambiguous!
+
+.. math::
+
+   f(48^\circ) = 2 \Omega \sin \left( \frac{48 \pi}{180} \right)
+
+.. code:: mathematica
+
+   glibc 2.22: 0.108381727637274115E-03 (3F1C695FE71A3FE4)
+         2.26: 0.108381727637274128E-03 (3F1C695FE71A3FE5)
+
+*Avoid transcendentals where possible, manage dependencies when
+necessary.*
+
+.. notes::
+
+   * Rarely possible to identify the origin of such functions
+
+      * External library? (``libm``)
+
+      * Runtime?
+
+   * Sometimes unavoidable, but strictly speaking they should not be used
+
+   * Note that the power operator ``a**b`` falls under this category!
+
+
+Global Summation
+----------------
+
+The order of ``sum()`` is ambiguous!
+
+Parentheses work, but may have cumulant errors:
+
+.. math::
+
+   \sum{\phi} = \phi_1 + (\phi_2 + ( \phi_3 + ... ))
+
+Sums are stored in fixed-precision using six integers:
+
+.. image:: img/fixedprec.svg
+   :width: 80%
+   :target: https://doi.org/10.1016/j.parco.2014.04.007
+
+.. notes::
+
+   Parentheses are OK for cumulant sums, but there are problems:
+
+   - Must gather to one rank/thread before summing
+
+   - Cumulant errors depend on order, threaten accuracy
+
+   Cumulant sums over multiple bins resolve these issues.
+
+   * Importance of these will be clear in next couple of slides
+
+   ----
+
+   Hallberg and Adcroft, 2014: An Order-invariant Real-to-Integer Conversion
+   Sum.  Parallel Computing, 40(5-6), DOI:10.1016/j.parco.2014.04.007
+
+   Alistair says:
+
+   Many people are aware that those last digits we write out vary depending on
+   the order of summation. Not so for us which is why we can use it as a metric
+   for detecting regression.
+
+   Bob says:
+
+   With the global reproducing sums, we are able to get identical values to
+   roundoff compared with the single largest value in the sum, rather than
+   roundoff compared with the sum itself.  For an ocean model on a 1000x1000
+   grid, we are routinely able to detect global non-conservation that is larger
+   than about 1 part in 10^20.
+
+
+A Rebased History
+=================
+
+.. list-table::
+   :widths: 35 65
+
+   * - .. image:: img/git_rebased.svg
+
+     - Rebase user commits into ``dev``, creating a *linear history*
+
+       But rebased user commits have different hashes (aka history!)
+
+       NOTE: We *cannot* change ``dev/*`` hashes!  That must be *merged*
+
+.. notes::
+
+   * Clobbering user history causes some internal frustration!
+
+
+A Tangled History
+-----------------
+
+.. list-table::
+   :widths: 45 55
+
+   * - .. image:: img/git_branchy.svg
+
+     - Having many active users leads to a non-sequential history
+
+       This severely complicates our ability to track bugs and regressions!
+
+
+Code Continuity
+---------------
+
+.. list-table::
+   :widths: 40 60
+
+   - * .. image:: img/git_nodes_dev.svg
+
+     * - Merges to ``main`` are **unanimous**
+
+       - All branches within a node are preserved
+
+       - Nodes can easily collaborate on joint projects
+
+
+~~~~~~~~~~~~~~~~~~~~
+
+.. Old stuff
+
+
+Reproducibility Rules
+=====================
+
+* Numerical expressions must be *bit-reproducible*
+
+* Code must not change existing solutions
+
+* Changes must not disrupt existing research
+
+.. notes::
+
+   How to navigate this issue?
+
+   * Regression testing requires reproducibility
+
+   * Forecasters require reproducible output
+
+   * Researchers want latest features without answer changes
+
+
+What we *Don't* require
+-----------------------
+
+When can answers differ?
+
+* Aggressive optimization (``-O3 -mavx ...``)
+
+* Hardware (Intel, AMD, A64FX, ...)
+
+* Compilers (``gcc``, ``ifort``, ...)
+
+* Libraries (``libm.a``, ...)
+
+.. TODO others?
+
+But we still try to maximize reproducibility.
+
+.. (Come back to this at the end...)
+
+
+Descriptive Commits
+===================
+
+.. include:: src/git.log
+   :code: txt
+
+Also: *No "fixed my typo" commits!*
+
+.. notes::
+
+   * Code is the "how"
+
+   * Commits are the "why"
+
+   * long-form commits are required
+
+   * Reality?  We do a lot of squashing and rebasing
+
+
+----
+
+.. list-table::
+   :widths: 45 55
+
+   * - .. image:: media/linus_and_dirk.png
+
+     -
+
+         Commit messages to me are almost as important as the code change
+         itself.
+
+         If you can explain the code change to me, I will trust the code.
+
+Linus Torvalds, Linux OSS 2020
+
+.. notes::
+
+   https://www.youtube.com/watch?v=H8Gd9t7FQqI
+
+
+Summary
+=======
+
+Code preservation?
+   Mutual governance by a *consortium* of groups
+
+Preserve existing solutions?
+   *Regression* and *self-consistency* testing
+
+Bit reproducibility?
+   Restrict model to *non-ambiguous* operations

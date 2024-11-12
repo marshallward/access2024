@@ -1,6 +1,6 @@
-==================
-Your New MOM6 Node
-==================
+====================
+MOM6 ACCESS Workshop
+====================
 
 :author: Marshall Ward
 :organization: NOAA-GFDL
@@ -358,21 +358,17 @@ Validate 61 tests using 3 compilers
 Bit Reproducibility
 ===================
 
-Sources of regressions:
-
-* Arithmetic
-
+Arithmetic
   :math:`(x + y) + z \neq x + (y + z)`
 
-* Fortran Intrinsics
-
+Fortran Intrinsics
   ``sum()``, ``sin()``, ``matmul()``, ``a**b``
 
-* Math libraries
+Operating System
+  System math libraries may define ``sin()``
 
-  Your OS (``libc.a``) may define ``sin()``
-
-* Fused multiply-add (FMA): ``a*b+c``
+Fused multiply-add
+   ``a*b + c``
 
 
 Floating Point Review
@@ -502,53 +498,6 @@ Sums are stored in fixed-precision using six integers:
    than about 1 part in 10^20.
 
 
-A Rebased History
-=================
-
-.. list-table::
-   :widths: 35 65
-
-   * - .. image:: img/git_rebased.svg
-
-     - Rebase user commits into ``dev``, creating a *linear history*
-
-       But rebased user commits have different hashes (aka history!)
-
-       NOTE: We *cannot* change ``dev/*`` hashes!  That must be *merged*
-
-.. notes::
-
-   * Clobbering user history causes some internal frustration!
-
-
-A Tangled History
------------------
-
-.. list-table::
-   :widths: 45 55
-
-   * - .. image:: img/git_branchy.svg
-
-     - Having many active users leads to a non-sequential history
-
-       This severely complicates our ability to track bugs and regressions!
-
-
-Code Continuity
----------------
-
-.. list-table::
-   :widths: 40 60
-
-   - * .. image:: img/git_nodes_dev.svg
-
-     * - Merges to ``main`` are **unanimous**
-
-       - All branches within a node are preserved
-
-       - Nodes can easily collaborate on joint projects
-
-
 Descriptive Commits
 ===================
 
@@ -587,6 +536,59 @@ Linus Torvalds, Linux OSS 2020
 .. notes::
 
    https://www.youtube.com/watch?v=H8Gd9t7FQqI
+
+
+A Rebased History
+=================
+
+.. list-table::
+   :widths: 35 65
+
+   * - .. image:: img/git_rebased.svg
+
+     - We **rebase** user commits into ``dev``, creating a *linear history*
+
+       Rebased user commits have different hashes (or "history"!)
+
+       (Not every user is happy about this!!)
+
+.. notes::
+
+   * Clobbering user history causes some internal frustration!
+
+
+A Tangled History
+-----------------
+
+.. list-table::
+   :widths: 45 55
+
+   * - .. image:: img/git_branchy.svg
+
+     - Having many active users leads to a non-sequential history
+
+       This severely complicates our ability to track bugs and regressions!
+
+
+Submission to ``main``
+======================
+
+TODO
+
+
+Merges to Main
+==============
+
+.. list-table::
+   :widths: 40 60
+
+   - * .. image:: img/git_nodes_dev.svg
+
+     * - Merges to ``main`` are **unanimous**
+
+       - All branches within a node are preserved
+
+       - Nodes can easily collaborate on joint projects
 
 
 Summary

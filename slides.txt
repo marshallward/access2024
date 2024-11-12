@@ -11,6 +11,17 @@ Your New MOM6 Node
    TODO
 
 
+===========
+
+Managing the MOM6 Codebase
+   Within ACCESS and the across the consortium
+
+Contributing to MOM6
+   How GFDL tests and approves pull requests
+
+Preservation of solutions
+   How bit reproducibility is used to preserve answers
+
 
 MOM6 Consortium
 ===============
@@ -19,10 +30,6 @@ MOM6 Consortium
    :width: 80%
 
 
-.. this is you
-
-
-What is the MOM6 Consortium?
 ----------------------------
 
 .. list-table::
@@ -37,33 +44,33 @@ What is the MOM6 Consortium?
        Groups manage their own branch, and contribute to ``main``.
 
 
-Consortium Taxonomy
+Consortium Branches
 -------------------
 
-* ``main``
+``main``
+  Public release, hosted at ``mom-ocean/MOM6``
 
-  "Public release", hosted at mom-ocean/MOM6
+``dev/{gfdl,ncar,access,...}``
+  Research nodes.  Commits in ``dev/*`` will be in ``main``
 
-* ``dev/{gfdl,ncar,access,...}``
-
-  Development nodes.  Commits in ``dev/*`` will be in ``main``
-
-* User forks
-
-  Actual model development, commits are *rebased* into ``dev/*`` (...?)
+User forks
+  Actual model development, commits are *rebased* into ``dev/*``
 
 
 Contribution Rules
 ==================
 
-Every node can change code as needed, and defines its own process.  However,
-changes must not disrupt ongoing research.
+Every node can change code as needed, but must not disrupt ongoing research at
+other nodes.
 
 * Code must not change existing solutions
 
+  Rigorous **testing** and **code review**
+
 * History must be preserved
 
-This is maintained by *careful testing* and *consensus*!
+  Only **merge commits** between ``main`` and ``dev/*``
+
 
 .. notes::
 
@@ -81,15 +88,15 @@ GFDL PR life Cycle
 
 .. image:: img/life_cycle.svg
 
-1. User submits to node by PR
+* User submits to node by PR
 
-2. Automated verification testing
+* Automated verification testing
 
-3. Code review (by a human)
+* Code review (by a human)
 
-4. Test for regressions on production machine
+* Test for regressions on production machine
 
-5. Rebase into node codebase
+* Rebase into node repository
 
 
 Verification Testing
@@ -164,7 +171,7 @@ Rotation
 Equations should be invariant to rotation
 
 .. list-table::
-   :widths: 25 25 25 25
+   :widths: 25 25 25 19
 
    * - .. image:: media/orig.png
 
@@ -174,7 +181,7 @@ Equations should be invariant to rotation
 
      - .. image:: img/rotate_grid2.svg
 
-Perhaps should be called an "index" rotation
+Internally, the data is reordered:
 
 .. image:: img/rotate_mem.svg
           :width: 65%
@@ -227,14 +234,18 @@ Invariant stencils
 
 
 
-Misc
-----
+Miscellaneous
+-------------
 
-* Static memory
+* Static memory allocation
 
 * OpenMP
 
+  Can loops be threaded?
+
 * Randomized Initialization
+
+  i.e. has data been properly initialized?
 
 
 Verification Testing
@@ -323,6 +334,26 @@ Validate 61 tests using 3 compilers
    * Requires our production machine!
 
       * (up to 480 cores)
+
+
+What we *Don't* require
+-----------------------
+
+When can answers differ?
+
+* Aggressive optimization (``-O3 -mavx ...``)
+
+* Hardware (Intel, AMD, ARM64, ...)
+
+* Compilers (``gcc``, ``ifort``, ...)
+
+* Libraries (``libm.a``, ...)
+
+.. TODO others?
+
+But we still try to maximize reproducibility.
+
+.. (Come back to this at the end...)
 
 
 Bit Reproducibility
@@ -519,58 +550,13 @@ Code Continuity
        - Nodes can easily collaborate on joint projects
 
 
-~~~~~~~~~~~~~~~~~~~~
-
-.. Old stuff
-
-
-Reproducibility Rules
-=====================
-
-* Numerical expressions must be *bit-reproducible*
-
-* Code must not change existing solutions
-
-* Changes must not disrupt existing research
-
-.. notes::
-
-   How to navigate this issue?
-
-   * Regression testing requires reproducibility
-
-   * Forecasters require reproducible output
-
-   * Researchers want latest features without answer changes
-
-
-What we *Don't* require
------------------------
-
-When can answers differ?
-
-* Aggressive optimization (``-O3 -mavx ...``)
-
-* Hardware (Intel, AMD, A64FX, ...)
-
-* Compilers (``gcc``, ``ifort``, ...)
-
-* Libraries (``libm.a``, ...)
-
-.. TODO others?
-
-But we still try to maximize reproducibility.
-
-.. (Come back to this at the end...)
-
-
 Descriptive Commits
 ===================
 
 .. include:: src/git.log
    :code: txt
 
-Also: *No "fixed my typo" commits!*
+No "fixed my typo" commits
 
 .. notes::
 
@@ -606,6 +592,10 @@ Linus Torvalds, Linux OSS 2020
 
 Summary
 =======
+
+
+
+
 
 Code preservation?
    Mutual governance by a *consortium* of groups

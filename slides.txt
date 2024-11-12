@@ -39,9 +39,9 @@ MOM6 Consortium
 
      * Codebase is governed by a consortium of research groups.
 
-       All changes to the "hub" must be tracked and preserved.
+       Changes to the inner circle are tracked and preserved.
 
-       Groups manage their own branch, and contribute to ``main``.
+       Nodes manage how users contribute to their repos.
 
 
 Consortium Branches
@@ -112,8 +112,7 @@ This should run on any system, any compiler::
 
 * Unit tests are passing
 
-* Solutions are "invariant" (huh?) to various tests and transforms (layout,
-  restarts, *dimensional*, *rotations*)
+* Solutions are "invariant" to various tests and transforms (...?)
 
 
 Memory Grids
@@ -181,7 +180,7 @@ Equations should be invariant to rotation
 
      - .. image:: img/rotate_grid2.svg
 
-Internally, the data is reordered:
+Internally, the data is reordered
 
 .. image:: img/rotate_mem.svg
           :width: 65%
@@ -318,24 +317,6 @@ Diagnostics use multiple metrics
         Murmur or MD5?
 
 
-Regression Suite
-================
-
-.. image:: img/mom6_reg_suite.svg
-
-Validate 61 tests using 3 compilers
-
-.. notes::
-
-   * Three compilers (GNU, Intel, Nvidia)
-
-   * Test from idealized (2d, column, ...) to production (OM4)
-
-   * Requires our production machine!
-
-      * (up to 480 cores)
-
-
 What we *Don't* require
 -----------------------
 
@@ -354,6 +335,24 @@ When can answers differ?
 But we still try to maximize reproducibility.
 
 .. (Come back to this at the end...)
+
+
+Regression Suite
+================
+
+.. image:: img/mom6_reg_suite.svg
+
+Validate 61 tests using 3 compilers
+
+.. notes::
+
+   * Three compilers (GNU, Intel, Nvidia)
+
+   * Test from idealized (2d, column, ...) to production (OM4)
+
+   * Requires our production machine!
+
+      * (up to 480 cores)
 
 
 Bit Reproducibility

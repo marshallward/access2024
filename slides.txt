@@ -14,7 +14,7 @@ MOM6 ACCESS Workshop
 ===========
 
 Managing the MOM6 Codebase
-   Within ACCESS and the across the consortium
+   Within ACCESS and across the consortium
 
 Contributing to MOM6
    How GFDL tests and approves pull requests
@@ -60,8 +60,7 @@ User forks
 Contribution Rules
 ==================
 
-Every node can change code as needed, but must not disrupt ongoing research at
-other nodes.
+Every node can modify code as needed, within limits:
 
 * Code must not change existing solutions
 
@@ -70,7 +69,6 @@ other nodes.
 * History must be preserved
 
   Only **merge commits** between ``main`` and ``dev/*``
-
 
 .. notes::
 
@@ -88,7 +86,7 @@ GFDL PR life Cycle
 
 .. image:: img/life_cycle.svg
 
-* User submits to node by PR
+* User submits PR to node
 
 * Automated verification testing
 
@@ -112,7 +110,11 @@ This should run on any system, any compiler::
 
 * Unit tests are passing
 
-* Solutions are "invariant" to various tests and transforms (...?)
+* Solutions are invariant to various tests
+
+  * Restart (2:math:`\Delta \tau` run = 2 x 1:math:`\Delta \tau` run)
+  * CPU Layout (1x1 = 2x1 = 1x2)
+  * ...
 
 
 Memory Grids
@@ -130,38 +132,23 @@ Memory Grids
        .. figure:: img/Horizontal_NE_indexing_nonsym.png
 
 
-Layout
-------
-
-1x1 vs 2x1 vs 1x2(?)
-
-
-Restart
--------
-
-DT = 2x (DT/2)
-
-
 Dimensional
 -----------
 
-.. math::
-
-      u_t + u u_x + v u_y &= -g h_x \\
-      v_t + u v_x + v v_y &= -g h_y \\
-      h_t + h u_x + h v_y &= 0 \\
-
 .. list-table::
 
-   * - Dimensions:
-       * :math:`L` (horiz. length)
-       * :math:`T` (time)
-       * :math:`H` (layer depth)
+   * - .. math::
 
-     - Invariants:
-       * :math:`\left[ u, v \right] = L T^{-1}`
-       * :math:`\left[ g \right] = L^2 H^{-1} T^{-2}`
+            \mathbf{u}_t + \mathbf{u} \cdot \nabla \mathbf{u} &= -g \nabla h \\
+            h_t + \nabla \cdot \left( h \mathbf{u} \right) &= 0 \\
 
+     - * :math:`\mathbf{x} \rightarrow L\mathbf{x}`
+       * :math:`t \rightarrow T t`
+       * :math:`h \rightarrow H h`
+       * :math:`\mathbf{u} \rightarrow \frac{L}{T} \mathbf{u}`
+       * :math:`g \rightarrow \frac{L^2}{H T^2} g`
+
+Answers should be unchanged after scaling
 
 
 Rotation
@@ -271,10 +258,28 @@ CI testing is *platform independent*
    * Each test subject to a variety of **invariance** tests
 
 
-State of the Model
-==================
+Regression Suite
+================
 
-Global energy tracked to full precision
+.. image:: img/mom6_reg_suite.svg
+
+Validate 61 tests using 3 compilers
+
+.. notes::
+
+   * Three compilers (GNU, Intel, Nvidia)
+
+   * Test from idealized (2d, column, ...) to production (OM4)
+
+   * Requires our production machine!
+
+      * (up to 480 cores)
+
+
+Test Output 
+===========
+
+``ocean.stats``
 
 .. code:: mathematica
 
@@ -284,7 +289,7 @@ Global energy tracked to full precision
     12   0.50   2.7781004671136538E-04   1.1369E-12           ...
     24   1.00   2.7734897826598717E-04   1.8190E-12           ...
 
-Diagnostics use multiple metrics
+``chksum_diag``
 
 .. code:: mathematica
 
@@ -317,49 +322,11 @@ Diagnostics use multiple metrics
         Murmur or MD5?
 
 
-What we *Don't* require
------------------------
-
-When can answers differ?
-
-* Aggressive optimization (``-O3 -mavx ...``)
-
-* Hardware (Intel, AMD, ARM64, ...)
-
-* Compilers (``gcc``, ``ifort``, ...)
-
-* Libraries (``libm.a``, ...)
-
-.. TODO others?
-
-But we still try to maximize reproducibility.
-
-.. (Come back to this at the end...)
-
-
-Regression Suite
-================
-
-.. image:: img/mom6_reg_suite.svg
-
-Validate 61 tests using 3 compilers
-
-.. notes::
-
-   * Three compilers (GNU, Intel, Nvidia)
-
-   * Test from idealized (2d, column, ...) to production (OM4)
-
-   * Requires our production machine!
-
-      * (up to 480 cores)
-
-
 Bit Reproducibility
 ===================
 
-Arithmetic
-  :math:`(x + y) + z \neq x + (y + z)`
+Ambiguous Arithmetic
+  ``x + y + z``
 
 Fortran Intrinsics
   ``sum()``, ``sin()``, ``matmul()``, ``a**b``
@@ -369,6 +336,8 @@ Operating System
 
 Fused multiply-add
    ``a*b + c``
+
+.. negative zero!
 
 
 Floating Point Review
@@ -498,6 +467,26 @@ Sums are stored in fixed-precision using six integers:
    than about 1 part in 10^20.
 
 
+What we *Don't* require
+-----------------------
+
+When can answers differ?
+
+* Aggressive optimization (``-O3 -mavx ...``)
+
+* Hardware (Intel, AMD, ARM64, ...)
+
+* Compilers (``gcc``, ``ifort``, ...)
+
+* Libraries (``libm.a``, ...)
+
+.. TODO others?
+
+But we still try to maximize reproducibility.
+
+.. (Come back to this at the end...)
+
+
 Descriptive Commits
 ===================
 
@@ -573,7 +562,10 @@ A Tangled History
 Submission to ``main``
 ======================
 
-TODO
+.. image:: img/mom_ocean_pr.png
+   :width: 80%
+
+All nodes must approve each PR to ``main``
 
 
 Merges to Main
@@ -594,15 +586,9 @@ Merges to Main
 Summary
 =======
 
-
-
-
-
 Code preservation?
-   Mutual governance by a *consortium* of groups
+   * Mutual governance by a *consortium* of groups
 
 Preserve existing solutions?
-   *Regression* and *self-consistency* testing
-
-Bit reproducibility?
-   Restrict model to *non-ambiguous* operations
+   * *Regression* and *self-consistency* testing
+   * Restrict model to *non-ambiguous* operations
